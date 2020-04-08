@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+	<title>Book API</title>
+	<meta charset="utf-8"/>
+	<style>
+		body {background-color: #fff;}
+		h1   {color: #00cdcd;}
+
+		button {
+			  border-radius: 25px;
+			  background-color: #77c277; /* Green */
+			  border: none;
+			  color: #fff;;
+			  padding: 15px 32px;
+			  text-align: center;
+			  text-decoration: none;
+			  display: inline-block;
+			  font-size: 16px;
+			  font-family: "Times New Roman", Times, serif;
+			  box-shadow: 2px 2px #00cdcd;;
+			}
+
+		#maincontent{
+			margin-left: 50px;
+			margin-right: 50px;
+		}
+
+	</style>
+
+	<script>
+		function loadData() {
+			
+			request = new XMLHttpRequest();
+			document.getElementById("messageBoard").innerHTML += "<br>Step 1";
+ 
+ 			// requests a list of all titles of works reviewed by NYT Pulitzer Prize winning literary critic Michiko Kakutani
+			request.open("GET", "https://api.nytimes.com/svc/books/v3/reviews.json?byline=Michiko+Kakutani&api-key=wpDi4Nq0ba28fTyNYEneHiYOvy1v4eDF", true);
+
+			document.getElementById("messageBoard").innerHTML += "<br>Step 2";
+
+			request.onreadystatechange = function() {
+				console.log("change in state");
+
+				document.getElementById("messageBoard").innerHTML += "<br>current ready state: " + request.readyState;
+  
+				if (request.readyState == 4 && 
+					request.status == 200) 
+				{
+					// request worked, time to use the data
+					document.getElementById("messageBoard").innerHTML += "<br>Data is ready!";
+
+				}
+				else if (request.readyState == 4 && request.status != 200) 
+				{
+				   document.getElementById("messageBoard").innerHTML += "<br>Request failed!";
+				}
+
+			}
+			document.getElementById("messageBoard").innerHTML += "<br>Sending request";
+			request.send();
+			
+		}  // end load data
+
+		// prints books reviewed by Michiko Kakutani, to be called when button is clicked.
+		function printbooks()
+		{
+
+					theData = request.responseText;
+
+					document.getElementById("rawData").innerHTML += "<h1>" + "Raw Data (for the curious):" + "</h1>" + "<br>Raw data: " + theData;
+					//remove any stray data at the beginning of the string
+					idx = theData.indexOf("{");
+					theData = theData.substring(idx);
+					books = JSON.parse(theData);
+
+					// set up HTML area below which books will be printed
+					document.getElementById("bookList").innerHTML += "<h1>" + "Titles of Works Reviewed by Michiko Kakutani:" + "</h1>";
+
+					// print books reviewed with their author
+					for (i = 0; i < books["results"].length ; i++) {
+				
+							document.getElementById("bookList").innerHTML += "<br>" + books["results"][i]["book_title"];
+							document.getElementById("bookList").innerHTML += " by ";
+							document.getElementById("bookList").innerHTML += books["results"][i]["book_author"] +"<br>";
+					}
+		}
+	</script>
+</head>
+
+
+<body id="maincontent">
+	<h1> API Overview</h1>
+	<div> 
+		I selected the NYT Books API, which covers lists of all the bestseller lists, lists of bestsellers for a specific date or time (including the present), and book reviews.
+	</div>
+	<br>
+	<div> 
+		I chose this because I have been weeding through all of Michiko Kakutani's Book Reviews to find book recommendations in quaratine. She won the Pulitzer for her work as a literary critic, and her praise is considered one of the best stamps of approval a book can get. Instead of searching through her archived work on the website and filtering out articles that are not reviews, now I can just run this API request. 
+	</div>
+	<br>
+	<div>This is the site: https://developer.nytimes.com </div>
+	<div>It is free, but you have to make an account.</div>
+	<br>
+	<div>
+		The option I used was the "reviews" option and the specification by byline. I could have used the "lists" option and various subsets of that (i.e. "hardcover-fiction"), or filtered it by "author" etc. (There are too many potential options for queries for this API to list, but you get the gist).
+	</div>
+	<br>
+	<div>
+		Two applications where this API would be helpful is a book recommendations site, or a book search site. 
+		I used it in a less common format for personal reasons, but the API would be very helpful for any sort of site where people are trying to find book recommendations or find all bestsellers for a certain time etc. Now, the NYT already provides articles that sort bestsellers by year, time period etc. This would also be helpful if you were trying to do analysis on books reviewed or mentioned by the NYT for data purposes (i.e. a study on the world of literary criticism, or bestsellers, etc.).
+	</div>
+
+
+	<h1>Get Michiko Kakutani's Book Reviews</h1>
+	<div id="messageBoard">Loading...</div>
+	<script language="javascript">
+		loadData();
+	</script>
+
+	<!-- Button should not be clicked when it has not been printed that the data is ready-->
+	<button class="button" onclick="printbooks()">Click me once data is ready!</button>
+	<div id="bookList">&nbsp;</div>
+	<div id="rawData">&nbsp;</div>
+
+
+
+</body>
+</html>
